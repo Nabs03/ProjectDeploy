@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart</title>
+    <link rel="stylesheet" href="styles.css"> 
+</head>
+<body>
+
+    <div class="cart-container">
+        <h1>Shopping Cart</h1>
+        <div id="cart-content"></div>
+        <div class="total">
+            <p>Total: $<span id="total-price">0.00</span></p>
+        </div>
+        <button class="btn" onclick="clearCart()">Clear Cart</button>
+        <button class="btn" onclick="window.location.href='product.html'">Continue Shopping</button>
+        <button class="btn" onclick="window.location.href='checkout.html'">Check Out</button>
+    </div>
+
+    <script>
+        function renderCart() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const cartContent = document.getElementById('cart-content');
+            const totalPriceElement = document.getElementById('total-price');
+            cartContent.innerHTML = '';
+
+            if (cart.length === 0) {
+                cartContent.innerHTML = '<p class="empty-message">Your cart is empty.</p>';
+                totalPriceElement.textContent = '0.00';
+                return;
+            }
+
+            let totalPrice = 0;
+            let cartHTML = `<table><tr><th>Product</th><th>Price</th><th>Quantity</th><th>Total</th><th>Actions</th></tr>`;
+
+            cart.forEach((item, index) => {
+                const itemTotal = item.price * item.quantity;
+                totalPrice += itemTotal;
+                cartHTML += `
+                    <tr>
+                        <td>${item.name}</td>
+                        <td>$${item.price.toFixed(2)}</td>
+                        <td>
+                            <input type="number" value="${item.quantity}" min="1" onchange="updateQuantity(${index}, this.value)">
+                        </td>
+                        <td>$${itemTotal.toFixed(2)}</td>
+                        <td><button class="btn" onclick="removeItem(${index})">Remove</button></td>
+                    </tr>
+                `;
+            });
+
+            cartHTML += `</table>`;
+            cartContent.innerHTML = cartHTML;
+            totalPriceElement.textContent = totalPrice.toFixed(2);
+        }
+
+        function updateQuantity(index, newQuantity) {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            cart[index].quantity = parseInt(newQuantity, 10);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            renderCart();
+        }
+
+        function removeItem(index) {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            cart.splice(index, 1);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            renderCart();
+        }
+
+        function clearCart() {
+            localStorage.removeItem('cart');
+            renderCart();
+        }
+
+        
+        renderCart();
+    </script>
+
+</body>
+</html>
